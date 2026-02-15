@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'services/api_service.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -25,26 +26,24 @@ class PredictionScreen extends StatefulWidget {
 }
 
 class _PredictionScreenState extends State<PredictionScreen> {
+
+  final ApiService apiService = ApiService();
+
   final term1Controller = TextEditingController();
   final term2Controller = TextEditingController();
   String result = "";
 
-  Future<void> predictScore() async {
-    final response = await http.post(
-      Uri.parse("http://10.0.2.2:5000/predict"), // Android emulator
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "term1": double.parse(term1Controller.text),
-        "term2": double.parse(term2Controller.text),
-      }),
-    );
+Future<void> predictScore() async {
+  final prediction = await apiService.predict(
+    double.parse(term1Controller.text),
+    double.parse(term2Controller.text),
+  );
 
-    final data = jsonDecode(response.body);
+  setState(() {
+    result = "Predicted Score: $prediction";
+  });
+}
 
-    setState(() {
-      result = "Predicted Score: ${data["predicted_score"]}";
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
